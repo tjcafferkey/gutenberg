@@ -383,24 +383,39 @@ export function* requestMetaBoxUpdates() {
 		formData.append( key, value )
 	);
 
-	// Save the metaboxes
-	yield apiFetch( {
-		url: window._wpMetaBoxUrl,
-		method: 'POST',
-		body: formData,
-		parse: false,
-	} );
-	yield controls.dispatch( editPostStore.name, 'metaBoxUpdatesSuccess' );
+	try {
+		// Save the metaboxes
+		yield apiFetch( {
+			url: window._wpMetaBoxUrl,
+			method: 'POST',
+			body: formData,
+			parse: false,
+		} );
+		yield controls.dispatch( editPostStore.name, 'metaBoxUpdatesSuccess' );
+	} catch {
+		yield controls.dispatch( editPostStore.name, 'metaBoxUpdatesFailure' );
+	}
 }
 
 /**
- * Returns an action object used signal a successful meta box update.
+ * Returns an action object used to signal a successful meta box update.
  *
  * @return {Object} Action object.
  */
 export function metaBoxUpdatesSuccess() {
 	return {
 		type: 'META_BOX_UPDATES_SUCCESS',
+	};
+}
+
+/**
+ * Returns an action object used to signal a failed meta box update.
+ *
+ * @return {Object} Action object.
+ */
+export function metaBoxUpdatesFailure() {
+	return {
+		type: 'META_BOX_UPDATES_FAILURE',
 	};
 }
 
@@ -496,12 +511,20 @@ export function* __unstableSwitchToTemplateMode( template ) {
 
 	yield setIsEditingTemplate( true );
 
-	const message = !! template
-		? __( "Custom template created. You're in template mode now." )
-		: __(
-				'Editing template. Changes made here affect all posts and pages that use the template.'
-		  );
-	yield controls.dispatch( noticesStore, 'createSuccessNotice', message, {
-		type: 'snackbar',
-	} );
+	const isWelcomeGuideActive = yield controls.select(
+		editPostStore.name,
+		'isFeatureActive',
+		'welcomeGuideTemplate'
+	);
+
+	if ( ! isWelcomeGuideActive ) {
+		const message = !! template
+			? __( "Custom template created. You're in template mode now." )
+			: __(
+					'Editing template. Changes made here affect all posts and pages that use the template.'
+			  );
+		yield controls.dispatch( noticesStore, 'createSuccessNotice', message, {
+			type: 'snackbar',
+		} );
+	}
 }
