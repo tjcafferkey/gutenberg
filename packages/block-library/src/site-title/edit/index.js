@@ -37,40 +37,6 @@ export default function SiteTitleEdit( {
 		} ),
 	} );
 
-	let titleElement = (
-		<RichText
-			style={ { display: 'inline-block' } }
-			aria-label={ __( 'Site title text' ) }
-			placeholder={ __( 'Write site title…' ) }
-			value={ title }
-			onChange={ setTitle }
-			allowedFormats={ [] }
-			disableLineBreaks
-			__unstableOnSplitAtEnd={ () =>
-				insertBlocksAfter( createBlock( getDefaultBlockName() ) )
-			}
-		/>
-	);
-
-	if ( isLink ) {
-		titleElement = (
-			<RichText
-				tagName="a"
-				href="#site-title-pseudo-link"
-				style={ { display: 'inline-block' } }
-				aria-label={ __( 'Site title text' ) }
-				placeholder={ __( 'Write site title…' ) }
-				value={ title }
-				onChange={ setTitle }
-				allowedFormats={ [] }
-				disableLineBreaks
-				__unstableOnSplitAtEnd={ () =>
-					insertBlocksAfter( createBlock( getDefaultBlockName() ) )
-				}
-			/>
-		);
-	}
-
 	return (
 		<>
 			<BlockControls group="block">
@@ -109,7 +75,24 @@ export default function SiteTitleEdit( {
 					) }
 				</PanelBody>
 			</InspectorControls>
-			<TagName { ...blockProps }> { titleElement } </TagName>
+			<TagName { ...blockProps }>
+				<RichText
+					tagName={ isLink ? 'a' : 'div' }
+					href={ isLink ? '#site-title-pseudo-link' : '' }
+					style={ { display: 'inline-block' } }
+					aria-label={ __( 'Site title text' ) }
+					placeholder={ __( 'Write site title…' ) }
+					value={ title }
+					onChange={ setTitle }
+					allowedFormats={ [] }
+					disableLineBreaks
+					__unstableOnSplitAtEnd={ () =>
+						insertBlocksAfter(
+							createBlock( getDefaultBlockName() )
+						)
+					}
+				/>
+			</TagName>
 		</>
 	);
 }
